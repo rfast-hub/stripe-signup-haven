@@ -3,15 +3,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
 const Index = () => {
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const validateForm = () => {
+    const schema = z.object({
+      email: z.string().email("Invalid email address"),
+      phone: z.string().min(10, "Phone number must be at least 10 digits"),
+      password: z.string().min(8, "Password must be at least 8 characters"),
+      confirmPassword: z.string()
+    }).refine((data) => data.password === data.confirmPassword, {
+      message: "Passwords don't match",
+      path: ["confirmPassword"],
+    });
+
+    try {
+      schema.parse({ email, phone, password, confirmPassword });
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      }
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setLoading(true);
 
     try {
@@ -23,7 +53,7 @@ const Index = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
           },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ email, phone }),
         }
       );
 
@@ -48,7 +78,7 @@ const Index = () => {
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Sign up</CardTitle>
           <CardDescription>
-            Enter your email to continue with the payment process
+            Enter your details to create an account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -56,9 +86,39 @@ const Index = () => {
             <div className="space-y-2">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="tel"
+                placeholder="Phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Confirm password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 className="w-full"
               />
