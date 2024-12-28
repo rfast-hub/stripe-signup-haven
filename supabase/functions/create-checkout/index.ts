@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { email } = await req.json();
+    const { email, phone } = await req.json();
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
@@ -23,13 +23,16 @@ serve(async (req) => {
       customer_email: email,
       line_items: [
         {
-          price: 'INSERT_YOUR_PRICE_ID_HERE', // You'll need to replace this with your actual price ID
+          price: 'price_1QTsN0E4gc3VY6FiyEmpK5eh',
           quantity: 1,
         },
       ],
       mode: 'payment',
       success_url: `${req.headers.get('origin')}/success`,
       cancel_url: `${req.headers.get('origin')}/`,
+      metadata: {
+        phone: phone,
+      }
     });
 
     console.log('Payment session created:', session.id);
