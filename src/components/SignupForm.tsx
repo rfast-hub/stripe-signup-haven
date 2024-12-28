@@ -13,10 +13,25 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  const formatPhoneNumber = (phoneNumber: string) => {
+    // Remove any non-digit characters
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    
+    // Add the '+' prefix if not present
+    if (!cleaned.startsWith('+')) {
+      // Assuming US numbers if no country code provided
+      return `+1${cleaned}`;
+    }
+    return `+${cleaned}`;
+  };
+
   const validateForm = () => {
     const schema = z.object({
       email: z.string().email("Invalid email address"),
-      phone: z.string().min(10, "Phone number must be at least 10 digits"),
+      phone: z.string().min(10, "Phone number must be at least 10 digits")
+        .refine((val) => /^\+?[1-9]\d{1,14}$/.test(formatPhoneNumber(val)), {
+          message: "Invalid phone number format. Please include country code (e.g., +1 for US)",
+        }),
       password: z.string().min(8, "Password must be at least 8 characters"),
       confirmPassword: z.string()
     }).refine((data) => data.password === data.confirmPassword, {
@@ -44,15 +59,17 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
     if (!validateForm()) return;
     setLoading(true);
 
+    const formattedPhone = formatPhoneNumber(phone);
+
     try {
       // First create the user with email/password
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        phone,
+        phone: formattedPhone,
         options: {
           data: {
-            phone: phone // Store phone in user metadata
+            phone: formattedPhone // Store phone in user metadata
           }
         }
       });
@@ -61,12 +78,17 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
 
       // Then initiate phone verification
       const { error: otpError } = await supabase.auth.signInWithOtp({
-        phone: phone,
+        phone: formattedPhone,
       });
 
-      if (otpError) throw otpError;
+      if (otpError) {
+        if (otpError.message.includes("sms_send_failed")) {
+          throw new Error("Failed to send SMS. Please check your phone number format and try again.");
+        }
+        throw otpError;
+      }
 
-      onVerificationNeeded(phone);
+      onVerificationNeeded(formattedPhone);
       toast({
         title: "Verification code sent",
         description: "Please check your phone for the verification code.",
@@ -97,7 +119,7 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
       <div className="space-y-2">
         <Input
           type="tel"
-          placeholder="Phone number"
+          placeholder="Phone number (e.g., +1234567890)"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           required
