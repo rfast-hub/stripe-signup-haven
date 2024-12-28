@@ -14,23 +14,35 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
   const { toast } = useToast();
 
   const formatPhoneNumber = (phoneNumber: string) => {
-    // Remove any non-digit characters
-    const cleaned = phoneNumber.replace(/\D/g, '');
+    // Remove all non-digit characters except '+'
+    const cleaned = phoneNumber.replace(/[^\d+]/g, '');
     
-    // Add the '+' prefix if not present
-    if (!cleaned.startsWith('+')) {
-      // Assuming US numbers if no country code provided
-      return `+1${cleaned}`;
+    // If it already starts with '+', ensure there's only one '+'
+    if (cleaned.startsWith('+')) {
+      return '+' + cleaned.substring(1).replace(/\+/g, '');
     }
-    return `+${cleaned}`;
+    
+    // If no country code ('+') is present, assume US (+1)
+    // and ensure number is at least 10 digits
+    const digits = cleaned.replace(/\+/g, '');
+    if (digits.length >= 10) {
+      return `+1${digits.slice(-10)}`;
+    }
+    
+    return cleaned; // Return as is for validation to catch
   };
 
   const validateForm = () => {
     const schema = z.object({
       email: z.string().email("Invalid email address"),
-      phone: z.string().min(10, "Phone number must be at least 10 digits")
-        .refine((val) => /^\+?[1-9]\d{1,14}$/.test(formatPhoneNumber(val)), {
-          message: "Invalid phone number format. Please include country code (e.g., +1 for US)",
+      phone: z.string()
+        .min(10, "Phone number must be at least 10 digits")
+        .refine((val) => {
+          const formatted = formatPhoneNumber(val);
+          // E.164 format validation: +[country code][number]
+          return /^\+[1-9]\d{10,14}$/.test(formatted);
+        }, {
+          message: "Invalid phone number format. Please enter a valid number with country code (e.g., +1234567890)",
         }),
       password: z.string().min(8, "Password must be at least 8 characters"),
       confirmPassword: z.string()
@@ -83,7 +95,7 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
 
       if (otpError) {
         if (otpError.message.includes("sms_send_failed")) {
-          throw new Error("Failed to send SMS. Please check your phone number format and try again.");
+          throw new Error("Failed to send SMS. Please ensure your phone number is in international format (e.g., +1234567890) and try again.");
         }
         throw otpError;
       }
