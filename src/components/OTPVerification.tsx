@@ -24,7 +24,7 @@ export const OTPVerification = ({ phone }: OTPVerificationProps) => {
       const { error } = await supabase.auth.verifyOtp({
         phone,
         token: otp,
-        type: 'phone_change',
+        type: 'sms',
       });
 
       if (error) throw error;
