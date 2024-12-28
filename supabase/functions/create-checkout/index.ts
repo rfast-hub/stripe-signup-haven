@@ -27,7 +27,7 @@ serve(async (req) => {
           quantity: 1,
         },
       ],
-      mode: 'payment',
+      mode: 'subscription',
       success_url: `${req.headers.get('origin')}/success`,
       cancel_url: `${req.headers.get('origin')}/`,
       metadata: {
