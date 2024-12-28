@@ -12,11 +12,11 @@ serve(async (req) => {
   }
 
   try {
+    const { email } = await req.json();
+
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
-
-    const { email } = await req.json();
 
     console.log('Creating payment session...');
     const session = await stripe.checkout.sessions.create({
