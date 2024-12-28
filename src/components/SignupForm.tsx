@@ -14,22 +14,25 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
   const { toast } = useToast();
 
   const formatPhoneNumber = (phoneNumber: string) => {
-    // Remove all non-digit characters except '+'
-    const cleaned = phoneNumber.replace(/[^\d+]/g, '');
+    // First, clean the input by removing all non-digit characters except '+'
+    let cleaned = phoneNumber.replace(/[^\d+]/g, '');
     
-    // If it already starts with '+', ensure there's only one '+'
-    if (cleaned.startsWith('+')) {
-      return '+' + cleaned.substring(1).replace(/\+/g, '');
+    // Ensure only one '+' at the start
+    cleaned = cleaned.replace(/\+{2,}/g, '+');
+    if (cleaned.includes('+') && !cleaned.startsWith('+')) {
+      cleaned = cleaned.replace('+', '');
     }
     
-    // If no country code ('+') is present, assume US (+1)
-    // and ensure number is at least 10 digits
-    const digits = cleaned.replace(/\+/g, '');
-    if (digits.length >= 10) {
-      return `+1${digits.slice(-10)}`;
+    // If no '+' prefix, assume US number and add +1
+    if (!cleaned.startsWith('+')) {
+      // Take only the last 10 digits if there are more
+      const digits = cleaned.slice(-10);
+      if (digits.length === 10) {
+        return `+1${digits}`;
+      }
     }
     
-    return cleaned; // Return as is for validation to catch
+    return cleaned;
   };
 
   const validateForm = () => {
@@ -40,9 +43,9 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
         .refine((val) => {
           const formatted = formatPhoneNumber(val);
           // E.164 format validation: +[country code][number]
-          return /^\+[1-9]\d{10,14}$/.test(formatted);
+          return /^\+1\d{10}$/.test(formatted);
         }, {
-          message: "Invalid phone number format. Please enter a valid number with country code (e.g., +1234567890)",
+          message: "Please enter a valid US phone number (e.g., +1XXXXXXXXXX)",
         }),
       password: z.string().min(8, "Password must be at least 8 characters"),
       confirmPassword: z.string()
@@ -81,7 +84,7 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
         phone: formattedPhone,
         options: {
           data: {
-            phone: formattedPhone // Store phone in user metadata
+            phone: formattedPhone
           }
         }
       });
@@ -93,12 +96,7 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
         phone: formattedPhone,
       });
 
-      if (otpError) {
-        if (otpError.message.includes("sms_send_failed")) {
-          throw new Error("Failed to send SMS. Please ensure your phone number is in international format (e.g., +1234567890) and try again.");
-        }
-        throw otpError;
-      }
+      if (otpError) throw otpError;
 
       onVerificationNeeded(formattedPhone);
       toast({
@@ -131,7 +129,7 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
       <div className="space-y-2">
         <Input
           type="tel"
-          placeholder="Phone number (e.g., +1234567890)"
+          placeholder="US phone number (e.g., +1XXXXXXXXXX)"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           required
