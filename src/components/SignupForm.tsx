@@ -43,24 +43,23 @@ export const SignupForm = () => {
     setLoading(true);
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/success`,
-        },
+      // Create checkout session
+      const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke('create-checkout', {
+        body: { email, password }
       });
 
-      if (signUpError) throw signUpError;
+      if (checkoutError) throw checkoutError;
 
-      toast({
-        title: "Account created",
-        description: "Please check your email for verification instructions.",
-      });
+      // Redirect to Stripe checkout
+      if (checkoutData?.url) {
+        window.location.href = checkoutData.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create account",
+        description: error.message || "Failed to start checkout process",
         variant: "destructive",
       });
     } finally {
@@ -105,7 +104,7 @@ export const SignupForm = () => {
         className="w-full"
         disabled={loading}
       >
-        {loading ? "Creating account..." : "Sign up"}
+        {loading ? "Processing..." : "Sign up"}
       </Button>
     </form>
   );

@@ -12,41 +12,32 @@ serve(async (req) => {
   }
 
   try {
-    const { email, password } = await req.json();
+    const { sessionId } = await req.json();
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
 
-    console.log('Creating payment session...');
-    const session = await stripe.checkout.sessions.create({
-      customer_email: email,
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: 'price_1QTsN0E4gc3VY6FiyEmpK5eh', // Replace with your actual price ID
-          quantity: 1,
-        },
-      ],
-      mode: 'payment',
-      success_url: `${req.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get('origin')}/`,
-      metadata: {
-        email,
-        password,
-      }
-    });
+    console.log('Verifying payment session:', sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    console.log('Payment session created:', session.id);
+    if (session.payment_status !== 'paid') {
+      throw new Error('Payment not completed');
+    }
+
     return new Response(
-      JSON.stringify({ url: session.url }),
+      JSON.stringify({
+        success: true,
+        email: session.metadata?.email,
+        password: session.metadata?.password,
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
     );
   } catch (error) {
-    console.error('Error creating payment session:', error);
+    console.error('Error verifying payment:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
