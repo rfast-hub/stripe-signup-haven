@@ -45,14 +45,26 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: phone,
+      // First create the user with email/password
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        phone,
         options: {
-          shouldCreateUser: false,
-        },
+          data: {
+            phone: phone // Store phone in user metadata
+          }
+        }
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
+
+      // Then initiate phone verification
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        phone: phone,
+      });
+
+      if (otpError) throw otpError;
 
       onVerificationNeeded(phone);
       toast({
@@ -62,7 +74,7 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to send verification code",
+        description: error.message || "Failed to create account",
         variant: "destructive",
       });
     } finally {
@@ -117,7 +129,7 @@ export const SignupForm = ({ onVerificationNeeded }: { onVerificationNeeded: (ph
         className="w-full"
         disabled={loading}
       >
-        {loading ? "Sending code..." : "Continue with verification"}
+        {loading ? "Creating account..." : "Continue with verification"}
       </Button>
     </form>
   );
