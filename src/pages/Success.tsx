@@ -107,7 +107,7 @@ const Success = () => {
         </CardHeader>
         <CardContent>
           <Link to="/">
-            <Button className="w-full">Return to Home</Button>
+            <Button className="w-full">Continue to Login</Button>
           </Link>
         </CardContent>
       </Card>
