@@ -106,9 +106,9 @@ const Success = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Link to="/">
+          <a href="https://financesaas.lovable.app/login" className="block">
             <Button className="w-full">Continue to Login</Button>
-          </Link>
+          </a>
         </CardContent>
       </Card>
     </div>
