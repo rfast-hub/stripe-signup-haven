@@ -24,7 +24,7 @@ serve(async (req) => {
       payment_method_types: ['card'],
       line_items: [
         {
-          price: 'price_1QTsN0E4gc3VY6FiyEmpK5eh',
+          price: 'price_1QePfRE4gc3VY6FimPzxOVQj',
           quantity: 1,
         },
       ],
