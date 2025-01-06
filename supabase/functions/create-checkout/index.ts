@@ -31,6 +31,11 @@ serve(async (req) => {
       mode: 'subscription',
       success_url: `${req.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get('origin')}/`,
+      custom_text: {
+        terms_of_service_acceptance: {
+          message: 'I agree to the [Terms of Service](https://your-website.com/terms) and [Privacy Policy](https://your-website.com/privacy)'
+        }
+      },
       metadata: {
         email,
         password,
