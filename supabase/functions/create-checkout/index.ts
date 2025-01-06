@@ -33,7 +33,7 @@ serve(async (req) => {
       cancel_url: `${req.headers.get('origin')}/`,
       custom_text: {
         terms_of_service_acceptance: {
-          message: 'I agree to the [Terms of Service](https://your-website.com/terms) and [Privacy Policy](https://your-website.com/privacy)'
+          message: 'I agree to the [Terms of Service](https://cryptotrac.org/terms) and [Privacy Policy](https://cryptotrac.org/privacy)'
         }
       },
       metadata: {
