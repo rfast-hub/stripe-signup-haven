@@ -32,7 +32,7 @@ serve(async (req) => {
       subscription_data: {
         trial_period_days: 7,
       },
-      success_url: `${req.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: 'https://app.cryptotrack.org/',
       cancel_url: `${req.headers.get('origin')}/`,
       consent_collection: {
         terms_of_service: 'required',
