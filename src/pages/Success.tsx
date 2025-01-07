@@ -33,7 +33,7 @@ const Success = () => {
             email: data.email,
             password: data.password,
             options: {
-              emailRedirectTo: `${window.location.origin}/success`,
+              emailRedirectTo: 'https://app.cryptotrack.org/',
             },
           });
 
