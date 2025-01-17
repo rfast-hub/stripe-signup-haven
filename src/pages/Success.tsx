@@ -29,7 +29,7 @@ const Success = () => {
         if (verifyError) throw verifyError;
 
         if (data?.success) {
-          // Create user account
+          // Create user account with email verification
           const { error: signUpError } = await supabase.auth.signUp({
             email: data.email,
             password: data.password,
@@ -45,8 +45,10 @@ const Success = () => {
             description: "Please check your email for verification instructions.",
           });
 
-          // Redirect to app.cryptotrack.org immediately
-          window.location.href = 'https://app.cryptotrack.org/';
+          // Redirect to app.cryptotrack.org after a short delay
+          setTimeout(() => {
+            window.location.href = 'https://app.cryptotrack.org/';
+          }, 3000);
         } else {
           throw new Error("Payment verification failed");
         }

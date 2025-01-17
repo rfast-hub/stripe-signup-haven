@@ -5,12 +5,12 @@ export const SuccessState = () => (
     <CardHeader>
       <CardTitle className="text-2xl font-bold text-green-600">Payment Successful!</CardTitle>
       <CardDescription>
-        Thank you for your purchase. Please check your email to verify your account.
+        Thank you for your purchase. We've sent you an email with verification instructions.
       </CardDescription>
     </CardHeader>
     <CardContent>
       <p className="text-center text-sm text-gray-500">
-        Redirecting you to the app...
+        Please check your email to verify your account. You will be redirected to the app shortly...
       </p>
     </CardContent>
   </Card>
