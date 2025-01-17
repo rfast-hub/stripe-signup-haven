@@ -11,37 +11,55 @@ export type Database = {
     Tables: {
       price_alerts: {
         Row: {
+          ai_generated: boolean | null
+          ai_reasoning: string | null
+          alert_type: string | null
           condition: string
           created_at: string | null
+          creation_price: number | null
           cryptocurrency: string
           email_notification: boolean | null
           id: string
           is_active: boolean | null
-          target_price: number
+          percentage_change: number | null
+          target_price: number | null
           triggered_at: string | null
           user_id: string
+          volume_threshold: number | null
         }
         Insert: {
+          ai_generated?: boolean | null
+          ai_reasoning?: string | null
+          alert_type?: string | null
           condition: string
           created_at?: string | null
+          creation_price?: number | null
           cryptocurrency: string
           email_notification?: boolean | null
           id?: string
           is_active?: boolean | null
-          target_price: number
+          percentage_change?: number | null
+          target_price?: number | null
           triggered_at?: string | null
           user_id: string
+          volume_threshold?: number | null
         }
         Update: {
+          ai_generated?: boolean | null
+          ai_reasoning?: string | null
+          alert_type?: string | null
           condition?: string
           created_at?: string | null
+          creation_price?: number | null
           cryptocurrency?: string
           email_notification?: boolean | null
           id?: string
           is_active?: boolean | null
-          target_price?: number
+          percentage_change?: number | null
+          target_price?: number | null
           triggered_at?: string | null
           user_id?: string
+          volume_threshold?: number | null
         }
         Relationships: []
       }
@@ -51,6 +69,7 @@ export type Database = {
           created_at: string | null
           current_period_end: string | null
           id: string
+          is_active: boolean | null
           status: string
           subscription_id: string | null
           user_id: string
@@ -60,6 +79,7 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           id?: string
+          is_active?: boolean | null
           status: string
           subscription_id?: string | null
           user_id: string
@@ -69,6 +89,7 @@ export type Database = {
           created_at?: string | null
           current_period_end?: string | null
           id?: string
+          is_active?: boolean | null
           status?: string
           subscription_id?: string | null
           user_id?: string
