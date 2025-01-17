@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export const SuccessState = () => (
   <Card className="w-full max-w-md">
@@ -10,9 +9,9 @@ export const SuccessState = () => (
       </CardDescription>
     </CardHeader>
     <CardContent>
-      <a href="https://financesaas.lovable.app/login" className="block">
-        <Button className="w-full">Continue to Login</Button>
-      </a>
+      <p className="text-center text-sm text-gray-500">
+        Redirecting you to the app...
+      </p>
     </CardContent>
   </Card>
 );
