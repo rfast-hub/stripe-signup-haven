@@ -23,46 +23,55 @@ const Success = () => {
 
       try {
         // First verify the payment
-        const { data, error: verifyError } = await supabase.functions.invoke('verify-payment', {
+        const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-payment', {
           body: { sessionId }
         });
 
-        if (verifyError) throw verifyError;
-
-        if (data?.success) {
-          console.log("Payment verified, creating account for:", data.email);
-          
-          // Create user account with email verification
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: data.email,
-            password: data.password,
-            options: {
-              emailRedirectTo: 'https://app.cryptotrack.org',
-              data: {
-                payment_verified: true
-              }
-            }
-          });
-
-          if (signUpError) {
-            console.error("Signup error:", signUpError);
-            throw signUpError;
-          }
-
-          console.log("Account created:", signUpData);
-
-          toast({
-            title: "Account created",
-            description: "Please check your email for verification instructions.",
-          });
-
-          // Redirect to app.cryptotrack.org after a short delay
-          setTimeout(() => {
-            window.location.href = 'https://app.cryptotrack.org';
-          }, 3000);
-        } else {
-          throw new Error("Payment verification failed");
+        if (verifyError) {
+          console.error("Payment verification error:", verifyError);
+          throw verifyError;
         }
+
+        if (!verifyData?.success || !verifyData?.email || !verifyData?.password) {
+          console.error("Invalid verification data:", verifyData);
+          throw new Error("Invalid payment verification data");
+        }
+
+        console.log("Payment verified, creating account for:", verifyData.email);
+        
+        // Create user account with email verification
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: verifyData.email,
+          password: verifyData.password,
+          options: {
+            emailRedirectTo: 'https://app.cryptotrack.org',
+            data: {
+              payment_verified: true
+            }
+          }
+        });
+
+        if (signUpError) {
+          console.error("Signup error:", signUpError);
+          throw signUpError;
+        }
+
+        if (!signUpData.user) {
+          console.error("No user data returned:", signUpData);
+          throw new Error("Failed to create user account");
+        }
+
+        console.log("Account created successfully:", signUpData.user.id);
+
+        toast({
+          title: "Account created",
+          description: "Please check your email for verification instructions.",
+        });
+
+        // Redirect to app.cryptotrack.org after a short delay
+        setTimeout(() => {
+          window.location.href = 'https://app.cryptotrack.org';
+        }, 3000);
       } catch (err: any) {
         console.error("Error in createAccount:", err);
         setError(err.message);

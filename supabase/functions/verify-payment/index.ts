@@ -25,11 +25,17 @@ serve(async (req) => {
       throw new Error('Payment not completed');
     }
 
+    if (!session.metadata?.email || !session.metadata?.password) {
+      throw new Error('Missing user credentials in session metadata');
+    }
+
+    console.log('Payment verified for email:', session.metadata.email);
+
     return new Response(
       JSON.stringify({
         success: true,
-        email: session.metadata?.email,
-        password: session.metadata?.password,
+        email: session.metadata.email,
+        password: session.metadata.password,
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
