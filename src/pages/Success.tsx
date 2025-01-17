@@ -22,6 +22,7 @@ const Success = () => {
       }
 
       try {
+        // First verify the payment
         const { data, error: verifyError } = await supabase.functions.invoke('verify-payment', {
           body: { sessionId }
         });
@@ -29,16 +30,26 @@ const Success = () => {
         if (verifyError) throw verifyError;
 
         if (data?.success) {
+          console.log("Payment verified, creating account for:", data.email);
+          
           // Create user account with email verification
-          const { error: signUpError } = await supabase.auth.signUp({
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email: data.email,
             password: data.password,
             options: {
-              emailRedirectTo: 'https://app.cryptotrack.org/',
-            },
+              emailRedirectTo: 'https://app.cryptotrack.org',
+              data: {
+                payment_verified: true
+              }
+            }
           });
 
-          if (signUpError) throw signUpError;
+          if (signUpError) {
+            console.error("Signup error:", signUpError);
+            throw signUpError;
+          }
+
+          console.log("Account created:", signUpData);
 
           toast({
             title: "Account created",
@@ -47,12 +58,13 @@ const Success = () => {
 
           // Redirect to app.cryptotrack.org after a short delay
           setTimeout(() => {
-            window.location.href = 'https://app.cryptotrack.org/';
+            window.location.href = 'https://app.cryptotrack.org';
           }, 3000);
         } else {
           throw new Error("Payment verification failed");
         }
       } catch (err: any) {
+        console.error("Error in createAccount:", err);
         setError(err.message);
         toast({
           title: "Error",
