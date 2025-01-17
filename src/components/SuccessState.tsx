@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const SuccessState = () => (
@@ -8,10 +9,16 @@ export const SuccessState = () => (
         Thank you for your purchase. We've sent you an email with verification instructions.
       </CardDescription>
     </CardHeader>
-    <CardContent>
+    <CardContent className="space-y-4">
       <p className="text-center text-sm text-gray-500">
-        Please check your email to verify your account. You will be redirected to the app shortly...
+        Please check your email to verify your account before logging in.
       </p>
+      <Button 
+        className="w-full"
+        onClick={() => window.location.href = 'https://app.cryptotrack.org'}
+      >
+        Go to Login
+      </Button>
     </CardContent>
   </Card>
 );

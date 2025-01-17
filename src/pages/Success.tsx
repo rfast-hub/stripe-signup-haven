@@ -68,10 +68,6 @@ const Success = () => {
           description: "Please check your email for verification instructions.",
         });
 
-        // Redirect to app.cryptotrack.org after a short delay
-        setTimeout(() => {
-          window.location.href = 'https://app.cryptotrack.org';
-        }, 3000);
       } catch (err: any) {
         console.error("Error in createAccount:", err);
         setError(err.message);
